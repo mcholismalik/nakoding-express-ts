@@ -1,0 +1,48 @@
+version: '3'
+services:
+  nakoding-express-ts-db:
+    image: postgres:11
+    container_name: 'nakoding_express_ts_db'
+    volumes:
+      - nakoding-express-ts-db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=developer
+      - POSTGRES_DB=vendor_db
+      - POSTGRES_PORT=5433
+    ports:
+      - 5433:5432
+    networks:
+      - net
+
+  nakoding-express-ts-service:
+    image: node:11
+    container_name: 'nakoding_express_ts_service'
+    build: .
+    depends_on:
+      - nakoding-express-ts-db
+    environment:
+      NODE_ENV: development.local
+      DB_HOST: host.docker.internal
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_PORT: ${DB_PORT}
+      DB_DIALECT: ${DB_DIALECT}
+      DB_LOGGING: ${DB_LOGGING}
+
+    volumes:
+      - .:/app/
+    ports:
+      - 3031:3031
+    working_dir: /app/
+    networks:
+      - net
+    command: npm run watch
+
+volumes:
+  nakoding-express-ts-db:
+
+networks:
+  net:
+    driver: bridge
